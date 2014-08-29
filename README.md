@@ -3,6 +3,9 @@ CorpusDB2
 
 Second generation of CorpusDB --- corpus-based processing for Python, SuperCollider, and beyond.
 
+CorpusDB2 will borrow heavily from [CorpusDB](http://github.com/kitefishlabs/CorpusDB) in its initial stages. The goal (see below) is to iterate rapidly on as much of an existing design as possible. 
+
+
 Goals
 -----
 
