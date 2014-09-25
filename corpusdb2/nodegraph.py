@@ -3,8 +3,8 @@
 """
     Graph of Nodes.
         Nodes encapsulate audio processsing.
-        1:1 relationship to source file (optional).
-        1:M relationship to (potential) DataCollections.
+        1:M relationship to source file (optional).
+        1:1 relationship to (potential) DataCollections.
 """
 __version__ = '1.0'
 __author__ = 'Thomas Stoll'
@@ -23,31 +23,45 @@ from bregman.suite import *
 
 DEFAULT_IMAGESC_KWARGS={'origin':'upper', 'cmap':P.cm.hot, 'aspect':'auto', 'interpolation':'nearest'}
 
-class BregmanNodeGraph:
+class BregmanNodeGraph(object):
     """
     Based on Features class of Bregman Audio Toolkit.
     """
+    sndpath = '~/dev/git/public_projects/genomicmosaic/snd/'
+    audio_file = ''
+    rawaudio = None
+    sr = 0
+    fmt = ''
+    X = None
+    _feature = None
+
     def __init__(self, arg=None, **kwargs):
-        self.audio_file = ''
-        self.rawaudio = None
-        self.sr = 0
-        self.fmt = ''
-        self.X = None
-        self._feature = None
+        try:
+            self.sndpath = kwargs['sndpath']
+        except KeyError:
+            print "Using default sndpath: ", os.path.expanduser(self.sndpath)
     
+    def __repr__(self):
+        return "%s | %s" % (self.sndpath, self.audio_file)
+            
     def readWavFile(self, file):
         """
             Simply read raw audio data into class var.
         """
-        snd_dir = os.path.expanduser('~/dev/git/public_projects/genomicmosaic/snd/')
         self.audio_file = file
-        self.rawaudio, self.sr, self.fmt = wavread(os.path.join(snd_dir, self.audio_file))
+        fullpath = os.path.join(os.path.expanduser(self.sndpath), self.audio_file)
+        try:
+            self.rawaudio, self.sr, self.fmt = wavread(fullpath)
+        except IOError:
+            return "IOError! WAV read failed!"
+        return self.rawaudio
     
     def processWavFile(self, wav_filename, feature=LinearFrequencySpectrum):
-        self.read_wav_file(wav_filename)
+        self.readWavFile(wav_filename)
         if self.rawaudio is not None:
             self._feature = feature(self.rawaudio)
             self.X = self._feature.X
             self.dims = np.shape(self.X)
+            return self.X, self.dims
         else:
-            return self.rawaudio # None
+            return None
