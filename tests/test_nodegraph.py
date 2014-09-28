@@ -10,12 +10,13 @@ from nose.tools import assert_raises
 from nose.tools import raises
 
 
-class TestA(object):
+class TestNodeGraph(object):
+    correct_file = '/Users/kfl/dev/git/public_projects/CorpusDB2/tests/testsnd.wav'
     @classmethod
     def setup_class(klass):
         """This method is run once for each class before any tests are run"""
         pass
-    
+            
     @classmethod
     def teardown_class(klass):
         """This method is run once for each class _after_ all tests are run"""
@@ -23,38 +24,37 @@ class TestA(object):
     
     def setUp(self):
         """This method is run once before _each_ test method is executed"""
-        self.bng = BregmanNodeGraph(sndpath='/Users/kfl/dev/git/public_projects/CorpusDB2/tests')
+        self.bng = BregmanNodeGraph(metadata={'sndpath':'/Users/kfl/dev/git/public_projects/CorpusDB2/tests/testsnd.wav'})
         
     def teardown(self):
         """This method is run once after _each_ test method is executed"""
 
     def test_init(self):
-        
-        assert_equal(self.bng.sndpath, '/Users/kfl/dev/git/public_projects/CorpusDB2/tests')
+        assert_equal(self.bng.metadata['sndpath'], TestNodeGraph.correct_file)
 
     def test_read_wav(self):
-        self.bng.readWavFile('testsnd.wav')
-        assert_equal(self.bng.audio_file, 'testsnd.wav')
+        self.bng._readWavFile()
+        assert_equal(self.bng.metadata['sndpath'], TestNodeGraph.correct_file)
         assert_equal(self.bng.sr, 44100)
         assert_equal(self.bng.fmt, 'pcm16')
         assert_not_equal(self.bng.rawaudio, None)
     
     def test_wav_first_sample(self):
-        self.bng.readWavFile('testsnd.wav')
+        self.bng._readWavFile()
         assert_equal(self.bng.rawaudio[0], -0.005096435546875)
 
     def test_analysis_read_wav(self):
         """
         Calling processWavFile should call through to readWav, exactly as above.
         """
-        self.bng.processWavFile('testsnd.wav')
-        assert_equal(self.bng.audio_file, 'testsnd.wav')
+        self.bng.processWavFile()
+        assert_equal(self.bng.metadata['sndpath'], TestNodeGraph.correct_file)
         assert_equal(self.bng.sr, 44100)
         assert_equal(self.bng.fmt, 'pcm16')
         assert_not_equal(self.bng.rawaudio, None)
 
     def test_analysis(self):
-        self.bng.processWavFile('testsnd.wav')
+        self.bng.processWavFile()
         assert_equal(type(self.bng._feature), type(LinearFrequencySpectrum()))
         assert_equal(self.bng.X.shape, self.bng.dims)
         assert_equal(self.bng.X.shape, (8193, 26))        
