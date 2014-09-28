@@ -24,54 +24,67 @@ from bregman.suite import *
 DEFAULT_IMAGESC_KWARGS={'origin':'upper', 'cmap':P.cm.hot, 'aspect':'auto', 'interpolation':'nearest'}
 
 """
-These are the default params for the feature extractors:
+These are the default params/metadata for the feature extractors:
 {
-    'sample_rate': 44100, # The audio sample rate
-    'feature':'cqft',     # Which feature to extract (automatic for Features derived classes)
-    'nbpo': 12,           # Number of Bands Per Octave for front-end filterbank
-    'ncoef' : 10,         # Number of cepstral coefficients to use for cepstral features
-    'lcoef' : 1,          # Starting cepstral coefficient
-    'lo': 62.5,           # Lowest band edge frequency of filterbank
-    'hi': 16000,          # Highest band edge frequency of filterbank
-    'nfft': 16384,        # FFT length for filterbank
-    'wfft': 8192,         # FFT signal window length
-    'nhop': 4410,         # FFT hop size
-    'window' : 'hamm',    # FFT window type 
-    'log10': False,       # Whether to use log output
-    'magnitude': True,    # Whether to use magnitude (False=power)
-    'power_ext': ".power",# File extension for power files
-    'intensify' : False,  # Whether to use critical band masking in chroma extraction
-    'onsets' : False,     # Whether to use onset-synchronus features
-    'verbosity' : 1       # How much to tell the user about extraction
-}
-Expanded for BregmanNodeGraph:
-{
-    'sndpath': '~/dev/git/public_projects/genomicmosaic/snd/',
+    'sndpath': '~/dev/git/public_projects/genomicmosaic/snd/testsnd.wav',
     'feature': 'LinearFrequencySpectrum',
-    ...
-    plus the above...
+    'sr': 44100,            # The audio sample rate
+    'nbpo': 12,             # Number of Bands Per Octave for front-end filterbank
+    'ncoef' : 10,           # Number of cepstral coefficients to use for cepstral features
+    'lcoef' : 1,            # Starting cepstral coefficient
+    'lo': 62.5,             # Lowest band edge frequency of filterbank
+    'hi': 16000,            # Highest band edge frequency of filterbank
+    'nfft': 16384,          # FFT length for filterbank
+    'wfft': 8192,           # FFT signal window length
+    'nhop': 4410,           # FFT hop size
+    'window' : 'hamm',      # FFT window type 
+    'log10': False,         # Whether to use log output
+    'magnitude': True,      # Whether to use magnitude (False=power)
+    'power_ext': ".power",  # File extension for power files
+    'intensify' : False,    # Whether to use critical band masking in chroma extraction
+    'verbosity' : 1,        # How much to tell the user about extraction
+    'available_features' : [
+                LinearFrequencySpectrum, # all 6 available Bregman features
+                LogFrequencySpectrum, 
+                MelFrequencySpectrum, 
+                MelFrequencyCepstrum,
+                Chromagram,
+                dBPower]
 }
 
 """
 
-class BregmanNodeGraphMetadata(object):
-    
-    def __init__(self, arg=None, feature_params=None, **kwargs):
-        self._initialize(feature_params)
 
-    def _initialize(self, feature_params):
+class BregmanNodeGraph(object):
+    """
+    Based on Features class of Bregman Audio Toolkit.
+    """
+    rawaudio = None
+    sr = 0
+    fmt = ''
+    X = None
+    _feature = None
+
+    def __init__(self, arg=None, metadata=None):
+        self._initialize(metadata)
+    
+    def _initialize(self, metadata):
         """
         Initialize important parameters
         """
-        self.reset()
-        self.feature_params = self.default_params()
-        self._check_feature_params(feature_params)
+        # TODO:
+        # self.reset()
+        self.metadata = self.default_metadata()
+        self._check_metadata(metadata)
     
     @staticmethod
-    def default_params():
-        feature_params = {
-            'sample_rate': 44100,
-            'feature':'cqft', 
+    def default_metadata():
+        """ metadata == params """
+        metadata = {
+            'sndpath' : '~/dev/git/public_projects/genomicmosaic/snd/testsnd.wav',
+            'feature' : LinearFrequencySpectrum,
+            'sr': 44100,
+            'fmt' : 'pcm16',
             'nbpo': 12,
             'ncoef' : 10,
             'lcoef' : 1,
@@ -81,58 +94,42 @@ class BregmanNodeGraphMetadata(object):
             'wfft': 8192,
             'nhop': 4410,
             'window' : 'hamm',
-            'log10': False,
-            'magnitude': True,
-            'power_ext': ".power",
             'intensify' : False,
-            'onsets' : False,
-            'verbosity' : 0
-            }
-        return feature_params
+            'verbosity' : 0,
+            'available_features' : [
+                LinearFrequencySpectrum, 
+                LogFrequencySpectrum, 
+                MelFrequencySpectrum, 
+                MelFrequencyCepstrum,
+                Chromagram,
+                dBPower]
+        }
+        return metadata
 
-    def _check_feature_params(self,feature_params=None):
-        self.feature_params = feature_params if feature_params is not None else self.feature_params
-        fp = self.default_params()
+    def _check_metadata(self, metadata=None):
+        self.metadata = metadata if metadata is not None else self.metadata
+        fp = self.default_metadata()
         for k in fp.keys():
-            self.feature_params[k] = self.feature_params.get(k, fp[k])
-            self.__setattr__(k, self.feature_params[k])
-        return self.feature_params
-
-class BregmanNodeGraph(object):
-    """
-    Based on Features class of Bregman Audio Toolkit.
-    """
-    sndpath = '~/dev/git/public_projects/genomicmosaic/snd/'
-    audio_file = ''
-    rawaudio = None
-    sr = 0
-    fmt = ''
-    X = None
-    _feature = None
-
-    def __init__(self, arg=None, **kwargs):
-        try:
-            self.sndpath = kwargs['sndpath']
-        except KeyError:
-            print "Using default sndpath: ", os.path.expanduser(self.sndpath)
+            self.metadata[k] = self.metadata.get(k, fp[k])
+            self.__setattr__(k, self.metadata[k])
+        return self.metadata
     
     def __repr__(self):
-        return "%s | %s" % (self.sndpath, self.audio_file)
+        return "%s | %s" % (self.sndpath, self.audiofile)
             
-    def readWavFile(self, file):
+    def _readWavFile(self):
         """
             Simply read raw audio data into class var.
         """
-        self.audio_file = file
-        fullpath = os.path.join(os.path.expanduser(self.sndpath), self.audio_file)
+        fullpath = os.path.join(os.path.expanduser(self.metadata['sndpath']))
         try:
             self.rawaudio, self.sr, self.fmt = wavread(fullpath)
         except IOError:
             return "IOError! WAV read failed!"
         return self.rawaudio
     
-    def processWavFile(self, wav_filename, feature=LinearFrequencySpectrum):
-        self.readWavFile(wav_filename)
+    def processWavFile(self, feature=LinearFrequencySpectrum):
+        self._readWavFile()
         if self.rawaudio is not None:
             self._feature = feature(self.rawaudio)
             self.X = self._feature.X
@@ -144,7 +141,7 @@ class BregmanNodeGraph(object):
 
 """
         if type(arg)==P.ndarray:
-            self.set_audio(arg, sr=self.sample_rate)
+            self.set_audio(arg, sr=self.sr)
             self.extract()
         elif type(arg)==str:
             if arg:
