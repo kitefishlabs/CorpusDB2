@@ -96,13 +96,14 @@ class BregmanNodeGraph(object):
             'window' : 'hamm',
             'intensify' : False,
             'verbosity' : 0,
-            'available_features' : [
-                LinearFrequencySpectrum, 
-                LogFrequencySpectrum, 
-                MelFrequencySpectrum, 
-                MelFrequencyCepstrum,
-                Chromagram,
-                dBPower]
+            'available_features' : {
+                'LinearFrequencySpectrum' : '.linfreqspeq',
+                'LogFrequencySpectrum' : '.logfreqspeq',
+                'MelFrequencySpectrum' : '.melfreqspeq',
+                'MFCC' : '.mfcc',
+                'Chroma' : '.chroma',
+                'dBPower' : '.dbp'
+            }
         }
         return metadata
 

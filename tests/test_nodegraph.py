@@ -1,5 +1,3 @@
-
-
 from corpusdb2.nodegraph import BregmanNodeGraph
 import numpy as np
 from bregman.features import LinearFrequencySpectrum
@@ -31,7 +29,8 @@ class TestNodeGraph(object):
 
     def test_init(self):
         assert_equal(self.bng.metadata['sndpath'], TestNodeGraph.correct_file)
-
+        assert_equal(self.bng.sndpath, TestNodeGraph.correct_file)
+    
     def test_read_wav(self):
         self.bng._readWavFile()
         assert_equal(self.bng.metadata['sndpath'], TestNodeGraph.correct_file)
