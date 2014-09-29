@@ -1,8 +1,8 @@
 # datacollection.py - DataNodes and DataNodeCollections
 # CorpusDB2 - Corpus-based processing for audio.
 """
-    Graph of Nodes.
-        Nodes encapsulate audio processsing.
+    Data Collection.
+        Encapsulates raw analysis data.
         1:M relationship to source file (optional).
         1:1 relationship to (potential) DataCollections.
 """
@@ -19,17 +19,10 @@ from bregman.features import LinearFrequencySpectrum, LogFrequencySpectrum, MelF
 """
 These are the default metadata for a data node:
 {
-    'sndpath' : '~/dev/git/public_projects/genomicmosaic/snd/testsnd.wav',
-    'feature' : 'LinearFrequencySpectrum',
+    'sndpath' : '~/comp/corpusdb2/fulltest/snd/',
+    'datapath' : '~/comp/corpusdb2/fulltest/data/',
+    'metadatapath' : '~/comp/corpusdb2/fulltest/md/',
     'storage' : 'np_memmap', # 'bin', 'np_memmap' || 'db'
-    'nodegraph_metadata' : '', # init empty
-    'sndfile_metadata' : '', # init empty
-    'exists' : {
-        'sndfile' : 0,
-        'sndfile_metadata' : 0,
-        'nodegraph_metadata' : 0,
-        'data' : 0
-    }
 }
 
 """
