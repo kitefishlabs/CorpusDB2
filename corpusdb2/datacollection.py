@@ -14,7 +14,7 @@ __email__ = 'tms@kitefishlabs.com'
 
 import sys, time, os, glob, pickle, pdb
 import numpy as np
-from bregman.suite import *
+from bregman.features import LinearFrequencySpectrum, LogFrequencySpectrum, MelFrequencySpectrum, MelFrequencyCepstrum, Chromagram, dBPower
 
 """
 These are the default metadata for a data node:
@@ -39,8 +39,6 @@ class DataCollection(object):
     """
     Based on Features class of Bregman Audio Toolkit.
     """
-    _features = None
-
     def __init__(self, arg=None, metadata=None):
         self._initialize(metadata)
     
@@ -73,19 +71,23 @@ class DataCollection(object):
         return self.metadata
     
     
-    def pullToDataNodesAndSave(self, sounds, nodegraphs):
-        for snd in sounds:
-            fullpath=os.path.join(os.path.expanduser(self.sndpath), snd)
-            for ng in nodegraphs:
-                ng.processWavFile()
-                if self.storage is 'np_memmap':
-                    # construct file name
-                    extstring = ng.metadata.available_features[ng.feature.__name__]
-                    filename = os.path.join(
-                        os.path.expanduser(self.datapath), 
-                        (str(snd)+extstring))
-                    self.X = np.memmap(filename, nodegraph.X)
-                    self.X.flush()
-
+    def pullToDataNodesAndSave(self, nodegraphs):
+        for ng in nodegraphs:
+            print ng.feature, " | ", type(ng.feature)
+            ng.processWavFile(ng.sndpath, ng.feature)
+            print ng.X.shape
+            if self.storage is 'np_memmap':
+                # construct file name
+                extstring = ng.available_features[ng.feature.__class__.__name__] # well aren't we clever
+                filename = os.path.join(
+                    os.path.expanduser(self.datapath), 
+                    (str(ng.sndpath)+extstring))
+                fp = np.memmap(filename, np.float32, 'w+', shape=ng.dims)
+                fp[:] = ng.X[:]
+                del fp
         
+        
+#         for snd in sounds:
+#             fullpath = os.path.join(os.path.expanduser(self.sndpath), snd)
+#             print nodegraphs
         

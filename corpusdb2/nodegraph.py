@@ -12,16 +12,12 @@ __copyright__ = "Copyright (C) 2014 Thomas Stoll, Kitefish Labs, All Rights Rese
 __license__ = "gpl 2.0 or higher"
 __email__ = 'tms@kitefishlabs.com'
 
-import sys, time, os, glob, pickle, pdb
+import os
 import numpy as np
-from bregman.suite import *
-# try:
-# 	have_sklearn = True
-# except ImportError:
-# 	print 'WARNING: sklearn not found. PCA, KMeans + Ward (hierarchical) clustering disabled.'
-# 	have_sklearn = False
+from bregman.features import LinearFrequencySpectrum, LogFrequencySpectrum, MelFrequencySpectrum, MelFrequencyCepstrum, Chromagram, dBPower
+from scikits.audiolab import wavread
 
-DEFAULT_IMAGESC_KWARGS={'origin':'upper', 'cmap':P.cm.hot, 'aspect':'auto', 'interpolation':'nearest'}
+# DEFAULT_IMAGESC_KWARGS={'origin':'upper', 'cmap':P.cm.hot, 'aspect':'auto', 'interpolation':'nearest'}
 
 """
 These are the default params/metadata for the feature extractors:
@@ -63,7 +59,7 @@ class BregmanNodeGraph(object):
     sr = 0
     fmt = ''
     X = None
-    _feature = None
+#     _feature = None
 
     def __init__(self, arg=None, metadata=None):
         self._initialize(metadata)
@@ -100,7 +96,7 @@ class BregmanNodeGraph(object):
                 'LinearFrequencySpectrum' : '.linfreqspeq',
                 'LogFrequencySpectrum' : '.logfreqspeq',
                 'MelFrequencySpectrum' : '.melfreqspeq',
-                'MFCC' : '.mfcc',
+                'MelFrequencyCepstrum' : '.mfcc',
                 'Chroma' : '.chroma',
                 'dBPower' : '.dbp'
             }
@@ -116,24 +112,29 @@ class BregmanNodeGraph(object):
         return self.metadata
     
     def __repr__(self):
-        return "%s | %s" % (self.sndpath, self.audiofile)
+        return "%s | %s" % (self.sndpath, self.feature)
             
     def _readWavFile(self):
         """
             Simply read raw audio data into class var.
         """
-        fullpath = os.path.join(os.path.expanduser(self.metadata['sndpath']))
+        fullpath = os.path.join(os.path.expanduser(self.sndpath))
         try:
             self.rawaudio, self.sr, self.fmt = wavread(fullpath)
         except IOError:
             return "IOError! WAV read failed!"
         return self.rawaudio
     
-    def processWavFile(self, feature=LinearFrequencySpectrum):
+    def processWavFile(self, sndpath=None, ftr=None):
+        if sndpath is not None:
+            self.sndpath = sndpath
         self._readWavFile()
+        if ftr is None:
+            ftr = self.feature
         if self.rawaudio is not None:
-            self._feature = feature(self.rawaudio)
-            self.X = self._feature.X
+            print type(ftr)
+            self.feature = ftr(self.rawaudio)
+            self.X = self.feature.X
             self.dims = np.shape(self.X)
             return self.X, self.dims
         else:
