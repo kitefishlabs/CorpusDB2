@@ -12,7 +12,7 @@ __copyright__ = "Copyright (C) 2014 Thomas Stoll, Kitefish Labs, All Rights Rese
 __license__ = "gpl 2.0 or higher"
 __email__ = 'tms@kitefishlabs.com'
 
-import sys, time, os, glob, pickle, pdb
+import os, re, json
 import numpy as np
 from bregman.features import LinearFrequencySpectrum, LogFrequencySpectrum, MelFrequencySpectrum, MelFrequencyCepstrum, Chromagram, dBPower
 
@@ -55,9 +55,9 @@ class DataCollection(object):
     def default_metadata():
         """ These entries should  """
         metadata = {
-            'sndpath' : '~/comp/corpusdb2/snd/',
-            'datapath' : '~/comp/corpusdb2/data/',
-            'metadatapath' : '~/comp/corpusdb2/md/',
+            'sndpath' : '~/comp/corpusdb2/fulltest/snd/',
+            'datapath' : '~/comp/corpusdb2/fulltest/data/',
+            'metadatapath' : '~/comp/corpusdb2/fulltest/md/',
             'storage' : 'np_memmap', # 'bin', 'np_memmap' || 'db'
         }
         return metadata
@@ -68,8 +68,7 @@ class DataCollection(object):
         for k in md.keys():
             self.metadata[k] = self.metadata.get(k, md[k])
             self.__setattr__(k, self.metadata[k])
-        return self.metadata
-    
+        return self.metadata    
     
     def pullToDataNodesAndSave(self, nodegraphs):
         for ng in nodegraphs:
@@ -78,16 +77,22 @@ class DataCollection(object):
             print ng.X.shape
             if self.storage is 'np_memmap':
                 # construct file name
+                filename = os.path.basename(ng.sndpath)
                 extstring = ng.available_features[ng.feature.__class__.__name__] # well aren't we clever
-                filename = os.path.join(
-                    os.path.expanduser(self.datapath), 
-                    (str(ng.sndpath)+extstring))
-                fp = np.memmap(filename, np.float32, 'w+', shape=ng.dims)
-                fp[:] = ng.X[:]
-                del fp
-        
-        
-#         for snd in sounds:
-#             fullpath = os.path.join(os.path.expanduser(self.sndpath), snd)
-#             print nodegraphs
-        
+                if self.datapath is not None and self.metadatapath is not None:
+                    filepath = os.path.join(
+                        os.path.expanduser(self.datapath),
+                        (str(filename)+extstring))
+                    fp = np.memmap(filepath, np.float32, 'w+', shape=ng.dims)
+                    fp[:] = ng.X[:]
+                    del fp
+                    md_filepath = os.path.join(
+                        os.path.expanduser(self.metadatapath),
+                        (str(filename)+extstring+".json"))
+                    j = json.dumps(self.metadata, indent=4)
+                    f = open(md_filepath, 'w')
+                    print >> f, j
+                    f.close()
+                else:
+                    print "Error. Unable to save metadata file!"
+                
