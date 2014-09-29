@@ -108,9 +108,9 @@ class BregmanNodeGraph(object):
 
     def _check_metadata(self, metadata=None):
         self.metadata = metadata if metadata is not None else self.metadata
-        fp = self.default_metadata()
-        for k in fp.keys():
-            self.metadata[k] = self.metadata.get(k, fp[k])
+        md = self.default_metadata()
+        for k in md.keys():
+            self.metadata[k] = self.metadata.get(k, md[k])
             self.__setattr__(k, self.metadata[k])
         return self.metadata
     
