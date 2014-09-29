@@ -1,6 +1,6 @@
 from corpusdb2.nodegraph import BregmanNodeGraph
 import numpy as np
-from bregman.features import LinearFrequencySpectrum
+from bregman.features import LinearFrequencySpectrum, LogFrequencySpectrum
 
 from nose.tools import assert_equal
 from nose.tools import assert_not_equal
@@ -54,8 +54,19 @@ class TestNodeGraph(object):
 
     def test_analysis(self):
         self.bng.processWavFile()
-        assert_equal(type(self.bng._feature), type(LinearFrequencySpectrum()))
+        assert_equal(type(self.bng.feature), type(LinearFrequencySpectrum()))
         assert_equal(self.bng.X.shape, self.bng.dims)
         assert_equal(self.bng.X.shape, (8193, 26))        
         assert_equal(self.bng.X[0, 0], 5.9111043810844421e-05)
+
+    def test_analysis_of_feature(self):
+        self.bng = BregmanNodeGraph(metadata={
+            'sndpath' : '/Users/kfl/dev/git/public_projects/CorpusDB2/tests/testsnd.wav',
+            'feature' : LogFrequencySpectrum
+        })
+        self.bng.processWavFile()
+        assert_equal(type(self.bng.feature), type(LogFrequencySpectrum()))
+        assert_equal(self.bng.X.shape, self.bng.dims)
+        assert_equal(self.bng.X.shape, (95, 26))
+        assert_equal(self.bng.X[0, 0], 6.77744419673909e-05)
 
