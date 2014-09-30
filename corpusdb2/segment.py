@@ -1,10 +1,8 @@
-# datacollection.py - DataNodes and DataNodeCollections
+# segment.py - Spans, Segments and Segmentations
 # CorpusDB2 - Corpus-based processing for audio.
 """
-    Graph of Nodes.
-        Nodes encapsulate audio processsing.
-        1:M relationship to source file (optional).
-        1:1 relationship to (potential) DataCollections.
+    Basic containers for segments of time-based and frame-based data.
+    Unexplained for now, should be fairly clear what's happening...
 """
 __version__ = '1.0'
 __author__ = 'Thomas Stoll'
@@ -14,11 +12,7 @@ __email__ = 'tms@kitefishlabs.com'
 
 import os, re, json
 import numpy as np
-
-"""
-Basic containers for segments of time-based and frame-based data.
-    Unexplained for now, should be fairly clear what's happening...
-"""
+from corpusdb2.datacollection import DataNode
 
 class TimeSpan(object):   
     def __init__(self, start_time=None, end_time=None, dur_time=None):
@@ -71,12 +65,13 @@ class Segmentation(object):
     A Segmentation consists of frame segments.
     Each segment has a start, end, and implicit duration in frames.
     """
-    def __init__(self, datanode, metadata=None):
-        if datanode is None:
-            return "Error: a data node is required."
-        self.data_node = datanode
+    def __init__(self, dnodepath, metadata=None):
+        if dnodepath is None:
+            return "Error: a data node JSON metadata path is required."
+        self._initialize(metadata)
+        self._datanode = None
         self.frame_spans = []
-#         self.read_raw_data_node(self.datanode)
+        self.read_datanode_json(dnodepath)
 
     def _initialize(self, metadata):
         """
@@ -91,10 +86,12 @@ class Segmentation(object):
     def default_metadata():
         """ These entries should  """
         metadata = {
-            'segpath' : '~/comp/corpusdb2/fulltest/snd/',
-            'datapath' : '~/comp/corpusdb2/fulltest/data/',
-            'metadatapath' : '~/comp/corpusdb2/fulltest/md/',
-            'storage' : 'np_memmap', # 'bin', 'np_memmap' || 'db'
+            'rootpath' : '~/comp/corpusdb2/fulltest/',
+            'dir' : 'seg',
+            'datanode' : '',
+            'overlap' : 0,
+            'frames' : -1,
+            'duration' : -1
         }
         return metadata
 
@@ -103,8 +100,35 @@ class Segmentation(object):
         md = self.default_metadata()
         for k in md.keys():
             self.metadata[k] = self.metadata.get(k, md[k])
+            print '***'
             self.__setattr__(k, self.metadata[k])
         return self.metadata    
+    
+    def read_datanode_json(self, dnodepath):
+        # check type???
+        print dnodepath
+        self._datanode = DataNode(metadata=load_any_json(str(dnodepath)))
+        print self._datanode
+        if int(self._datanode.dims[1]) is not None:
+            # handle one dimensional data
+            self.metadata['frames'] = (int(self._datanode.dims[0]), int(self._datanode.dims[1]))
+        else:
+            self.metadata['frames'] = (int(self._datanode.dims[0]),)
+
+#     def get_full_segpath(self, data_md, mflag=False, alt=None):
+#         # basename, just in case?
+#         dir = 'seg'
+#         if alt is not None:
+#             dir = str(alt)
+#         filename = os.path.basename(self.filename)
+#         extstring = self.available_features[self.feature.__class__.__name__] # well aren't we clever
+# #         print 'dir: ', dir
+#         if mflag:
+#             extstring += ".json"
+#         return os.path.join(
+#             os.path.expanduser(self.rootpath),
+#             dir,
+#             (str(filename)+extstring))
 
     def time_spans_to_frames(self, span_list):
         pass
@@ -122,10 +146,11 @@ class Segmentation(object):
 
     def __len__(self):
         return len(self.frame_spans)
-
+    
+    # do all error- and logic-checking in caller, for now...
     def append(self, segment):
-        if type(segment) is not Segment:
-            raise ValueError("Segmentation requires a Segment")
+        if type(segment) is not FrameSegment:
+            raise ValueError("Segmentation requires a FrameSegment")
         self.frame_spans.append(segment)
 
     def __repr__(self):
@@ -134,3 +159,7 @@ class Segmentation(object):
     # for now, assume that we will get a np array
 #     read_raw_data_node(self):
 #         self.datanode.get_
+
+def load_any_json(jsonfile):
+    json_data=open(jsonfile)
+    return json.load(json_data)
