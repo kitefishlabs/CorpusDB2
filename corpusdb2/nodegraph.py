@@ -12,7 +12,7 @@ __copyright__ = "Copyright (C) 2014 Thomas Stoll, Kitefish Labs, All Rights Rese
 __license__ = "gpl 2.0 or higher"
 __email__ = 'tms@kitefishlabs.com'
 
-import os
+import os, json
 import numpy as np
 from bregman.features import LinearFrequencySpectrum, LogFrequencySpectrum, MelFrequencySpectrum, MelFrequencyCepstrum, Chromagram, dBPower
 from scikits.audiolab import wavread
@@ -22,8 +22,9 @@ from scikits.audiolab import wavread
 """
 These are the default params/metadata for the feature extractors:
 {
-    'sndpath': '~/dev/git/public_projects/genomicmosaic/snd/testsnd.wav',
-    'feature': 'LinearFrequencySpectrum',
+    'rootpath' : '~/comp/corpusdb2/fulltest/',
+    'filename' : 'cage.wav',
+    'feature' : LinearFrequencySpectrum,
     'sr': 44100,            # The audio sample rate
     'nbpo': 12,             # Number of Bands Per Octave for front-end filterbank
     'ncoef' : 10,           # Number of cepstral coefficients to use for cepstral features
@@ -77,7 +78,8 @@ class BregmanNodeGraph(object):
     def default_metadata():
         """ metadata == params """
         metadata = {
-            'sndpath' : '~/dev/git/public_projects/genomicmosaic/snd/testsnd.wav',
+            'rootpath' : '~/comp/corpusdb2/fulltest/',
+            'filename' : 'cage.wav',
             'feature' : LinearFrequencySpectrum,
             'sr': 44100,
             'fmt' : 'pcm16',
@@ -112,34 +114,45 @@ class BregmanNodeGraph(object):
         return self.metadata
     
     def __repr__(self):
-        return "%s | %s" % (self.sndpath, self.feature)
+        return "%s | %s | %s" % (self.rootpath, self.filename, self.feature)
             
     def _readWavFile(self):
         """
             Simply read raw audio data into class var.
         """
-        fullpath = os.path.join(os.path.expanduser(self.sndpath))
+        fullsndpath = os.path.join(os.path.expanduser(self.rootpath), 'snd', self.filename)
         try:
-            self.rawaudio, self.sr, self.fmt = wavread(fullpath)
+            self.rawaudio, self.sr, self.fmt = wavread(fullsndpath)
         except IOError:
             return "IOError! WAV read failed!"
         return self.rawaudio
     
-    def processWavFile(self, sndpath=None, ftr=None):
-        if sndpath is not None:
-            self.sndpath = sndpath
+    def processWavFile(self, filename=None, ftr=None):
+        if filename is not None:
+            self.filename = filename
         self._readWavFile()
         if ftr is None:
             ftr = self.feature
         if self.rawaudio is not None:
-            print type(ftr)
             self.feature = ftr(self.rawaudio)
             self.X = self.feature.X
             self.dims = np.shape(self.X)
+            extstring = self.available_features[self.feature.__class__.__name__] # well aren't we clever
+            md_filepath = os.path.join(
+                os.path.expanduser(self.rootpath),
+                'ng',
+                (str(self.filename)+extstring+".json")
+            )
+            clean_md = self.metadata
+            clean_md['feature'] = clean_md['feature'].__name__
+            j = json.dumps(self.metadata, indent=4)
+            f = open(md_filepath, 'w')
+            print >> f, j
+            f.close()
             return self.X, self.dims
         else:
             return None
-
+        
 
 """
         if type(arg)==P.ndarray:

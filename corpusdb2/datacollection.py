@@ -19,9 +19,8 @@ from bregman.features import LinearFrequencySpectrum, LogFrequencySpectrum, MelF
 """
 These are the default metadata for a data node:
 {
-    'sndpath' : '~/comp/corpusdb2/fulltest/snd/',
-    'datapath' : '~/comp/corpusdb2/fulltest/data/',
-    'metadatapath' : '~/comp/corpusdb2/fulltest/md/',
+    'rootpath' : '~/comp/corpusdb2/fulltest/',
+    'filename' : 'cage.wav',
     'storage' : 'np_memmap', # 'bin', 'np_memmap' || 'db'
 }
 
@@ -48,9 +47,8 @@ class DataCollection(object):
     def default_metadata():
         """ These entries should  """
         metadata = {
-            'sndpath' : '~/comp/corpusdb2/fulltest/snd/',
-            'datapath' : '~/comp/corpusdb2/fulltest/data/',
-            'metadatapath' : '~/comp/corpusdb2/fulltest/md/',
+            'rootpath' : '~/comp/corpusdb2/fulltest/',
+            'filename' : 'cage.wav',
             'storage' : 'np_memmap', # 'bin', 'np_memmap' || 'db'
         }
         return metadata
@@ -65,22 +63,23 @@ class DataCollection(object):
     
     def pullToDataNodesAndSave(self, nodegraphs):
         for ng in nodegraphs:
-            print ng.feature, " | ", type(ng.feature)
-            ng.processWavFile(ng.sndpath, ng.feature)
-            print ng.X.shape
+#             print ng.filename, " || ", ng.feature, " | ", type(ng.feature)
+            ng.processWavFile()
             if self.storage is 'np_memmap':
-                # construct file name
-                filename = os.path.basename(ng.sndpath)
+                # basename, just in case?
+                filename = os.path.basename(ng.filename)
                 extstring = ng.available_features[ng.feature.__class__.__name__] # well aren't we clever
-                if self.datapath is not None and self.metadatapath is not None:
-                    filepath = os.path.join(
-                        os.path.expanduser(self.datapath),
+                if self.filename is not None:
+                    datapath = os.path.join(
+                        os.path.expanduser(self.rootpath),
+                        'data',
                         (str(filename)+extstring))
-                    fp = np.memmap(filepath, np.float32, 'w+', shape=ng.dims)
+                    fp = np.memmap(datapath, np.float32, 'w+', shape=ng.dims)
                     fp[:] = ng.X[:]
                     del fp
                     md_filepath = os.path.join(
-                        os.path.expanduser(self.metadatapath),
+                        os.path.expanduser(self.rootpath),
+                        'data',
                         (str(filename)+extstring+".json"))
                     j = json.dumps(self.metadata, indent=4)
                     f = open(md_filepath, 'w')
@@ -88,4 +87,9 @@ class DataCollection(object):
                     f.close()
                 else:
                     print "Error. Unable to save metadata file!"
-                
+    
+#     def get_raw_data_from_node(self, datanode_filename):
+#         
+#         filepath = '~/comp/corpusdb2/fulltest/dnodes/' + datanode_filename
+#         datanode_md = '~/comp/corpusdb2/fulltest/dnodes/' + datanode_filename
+#         fp = np.memmap(filepath, np.float32, 'r', shape=dnode.dims)
