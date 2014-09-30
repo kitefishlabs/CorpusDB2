@@ -127,6 +127,21 @@ class BregmanNodeGraph(object):
             return "IOError! WAV read failed!"
         return self.rawaudio
     
+    def get_full_ngpath(self, mflag=False, alt=None):
+        # basename, just in case?
+        dir = 'ng'
+        if alt is not None:
+            dir = str(alt)
+        filename = os.path.basename(self.filename)
+        extstring = self.available_features[self.feature.__class__.__name__] # well aren't we clever
+        print 'dir: ', dir
+        if mflag:
+            extstring += ".json"
+        return os.path.join(
+            os.path.expanduser(self.rootpath),
+            dir,
+            (str(filename)+extstring))
+    
     def process_wav_file(self, filename=None, ftr=None):
         if filename is not None:
             self.filename = filename
@@ -138,11 +153,7 @@ class BregmanNodeGraph(object):
             self.X = self.feature.X
             self.dims = np.shape(self.X)
             extstring = self.available_features[self.feature.__class__.__name__] # well aren't we clever
-            md_filepath = os.path.join(
-                os.path.expanduser(self.rootpath),
-                'ng',
-                (str(self.filename)+extstring+".json")
-            )
+            md_filepath = self.get_full_ngpath(mflag=True)
             clean_md = self.metadata
             clean_md['feature'] = clean_md['feature'].__name__
             j = json.dumps(self.metadata, indent=4)
