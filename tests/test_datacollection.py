@@ -27,5 +27,5 @@ class TestDataCollection(object):
         """This method is run once after _each_ test method is executed"""
 
     def test_init(self):
-        assert_equal(self.dc.sndpath, '~/comp/corpusdb2/fulltest/snd/')
+        assert_equal(self.dc.rootpath, '~/comp/corpusdb2/fulltest/')
     

@@ -1,0 +1,26 @@
+{
+    "lcoef": 1, 
+    "ncoef": 10, 
+    "sr": 44100, 
+    "fmt": "pcm16", 
+    "available_features": {
+        "MelFrequencyCepstrum": ".mfcc", 
+        "Chroma": ".chroma", 
+        "MelFrequencySpectrum": ".melfreqspeq", 
+        "LogFrequencySpectrum": ".logfreqspeq", 
+        "LinearFrequencySpectrum": ".linfreqspeq", 
+        "dBPower": ".dbp"
+    }, 
+    "rootpath": "/Users/kfl/dev/git/public_projects/CorpusDB2/tests/", 
+    "filename": "testsnd.wav", 
+    "window": "hamm", 
+    "nbpo": 12, 
+    "nfft": 16384, 
+    "lo": 62.5, 
+    "feature": "LinearFrequencySpectrum", 
+    "hi": 16000, 
+    "nhop": 4410, 
+    "intensify": false, 
+    "verbosity": 0, 
+    "wfft": 8192
+}
