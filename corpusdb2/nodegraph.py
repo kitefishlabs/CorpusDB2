@@ -134,7 +134,7 @@ class BregmanNodeGraph(object):
             dir = str(alt)
         filename = os.path.basename(self.filename)
         extstring = self.available_features[self.feature.__class__.__name__] # well aren't we clever
-        print 'dir: ', dir
+#         print 'dir: ', dir
         if mflag:
             extstring += ".json"
         return os.path.join(

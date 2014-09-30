@@ -24,6 +24,12 @@ These are the default metadata for a data node:
     'storage' : 'np_memmap', # 'bin', 'np_memmap' || 'db'
 }
 
+A. Data node does not know how to read its own metadata. Other nodes/classes read a dn's 
+metadata and, based on that, instantiate both the metadata and data as needed.
+
+B. Data nodes are set up to automatically read metadata and data upon creation, given that 
+such data exists and that there are no overriding flags set.
+
 """
 
 
@@ -71,7 +77,7 @@ class DataNode(object):
             dir = str(alt)
         filename = os.path.basename(ngraph.filename)
         extstring = ngraph.available_features[ngraph.feature.__class__.__name__] # well aren't we clever
-        print 'dir: ', dir
+#         print 'dir: ', dir
         if mflag:
             extstring += ".json"
         return os.path.join(
@@ -96,8 +102,10 @@ class DataNode(object):
                 f = open(md_filepath, 'w')
                 print >> f, j
                 f.close()
+                return 1
             else:
                 print "Error. Unable to save metadata file!"
+                return 0
 
 
 
@@ -127,7 +135,8 @@ class DataNodeCollection(object):
         """ These entries should  """
         metadata = {
             'rootpath' : '~/comp/corpusdb2/fulltest/',
-            'dir' : 'data'
+            'dir' : 'data',
+            'entries': []
         }
         return metadata
 
@@ -136,6 +145,7 @@ class DataNodeCollection(object):
         md = self.default_metadata()
         for k in md.keys():
             self.metadata[k] = self.metadata.get(k, md[k])
+            print k, ' --> ', self.metadata[k]
             self.__setattr__(k, self.metadata[k])
         return self.metadata    
     
@@ -156,9 +166,15 @@ class DataNodeCollection(object):
     def pull_to_datanodes_and_save(self, nodegraphs):
         for ng in nodegraphs:
             node = DataNode()
-            node.pull_to_datanode_and_save(ng)
-#             md_filepath = self.get_full_datapath_for_nodegraph(ng, True)
-#             j = json.dumps(self.metadata, indent=4)
-#             f = open(md_filepath, 'w')
-#             print >> f, j
-#             f.close()
+            res = node.pull_to_datanode_and_save(ng)
+            if res == 1:
+                print "success!"
+                self.metadata['entries'] += [[ng.filename, ng.feature.__class__.__name__]]
+            else:
+                print "failure!"
+        # for now, name it 'data.json'
+        md_filepath = os.path.join(os.path.expanduser(self.metadata['rootpath']), self.metadata['dir'], 'data.json')
+        j = json.dumps(self.metadata, indent=4)
+        f = open(md_filepath, 'w')
+        print >> f, j
+        f.close()

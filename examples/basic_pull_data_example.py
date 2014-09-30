@@ -28,7 +28,7 @@ dc.pull_to_datanodes_and_save(nodegraphs=myNodeGraphs)
 
 
 
-
+###############################################################
 
 from corpusdb2.nodegraph import BregmanNodeGraph
 from corpusdb2.datacollection import DataNode, DataNodeCollection
@@ -38,3 +38,12 @@ import glob, itertools
 ROOT = '/Users/kfl/comp/corpusdb2/fulltest'
 
 dn = DataNode()
+
+snds = []
+for filename in glob.glob(os.path.join(ROOT,'snd','*.wav')):
+    snds += [filename]
+snd = snds[0]
+
+myNodeGraph = BregmanNodeGraph(metadata={'rootpath':ROOT,'filename':snd,'feature':LinearFrequencySpectrum})
+
+dn.pull_to_datanode_and_save(nodegraph=myNodeGraph)
