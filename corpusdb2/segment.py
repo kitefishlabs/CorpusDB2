@@ -91,6 +91,7 @@ class Segmentation(object):
             'datanode' : '',
             'overlap' : 0,
             'frames' : -1,
+            'cols' : -1,
             'duration' : -1
         }
         return metadata
@@ -99,21 +100,31 @@ class Segmentation(object):
         self.metadata = metadata if metadata is not None else self.metadata
         md = self.default_metadata()
         for k in md.keys():
-            self.metadata[k] = self.metadata.get(k, md[k])
-            print '***'
-            self.__setattr__(k, self.metadata[k])
-        return self.metadata    
+            print 'KEY: ', k
+            self._update_metadata(k, self.metadata.get(k, md[k]))
+#             self.metadata[k] = self.metadata.get(k, md[k])
+#             print '***'
+#             self.__setattr__(k, self.metadata[k])
+        return self.metadata
+
+    def _update_metadata(self, k, val):
+        print '_update'
+        self.metadata[str(k)] = val
+        self.__setattr__(k, self.metadata[k])
     
     def read_datanode_json(self, dnodepath):
         # check type???
         print dnodepath
         self._datanode = DataNode(metadata=load_any_json(str(dnodepath)))
         print self._datanode
-        if int(self._datanode.dims[1]) is not None:
-            # handle one dimensional data
-            self.metadata['frames'] = (int(self._datanode.dims[0]), int(self._datanode.dims[1]))
+        if int(self._datanode.dims[1]) is None:
+            # first dim is # of frames
+            self._update_metadata('cols', 1)
+            self._update_metadata('frames', int(self._datanode.dims[0]))
         else:
-            self.metadata['frames'] = (int(self._datanode.dims[0]),)
+            self._update_metadata('cols', int(self._datanode.dims[1]))
+            self._update_metadata('frames', int(self._datanode.dims[0]))
+            
 
 #     def get_full_segpath(self, data_md, mflag=False, alt=None):
 #         # basename, just in case?
