@@ -56,6 +56,7 @@ class DataNode(object):
             'rootpath' : '~/comp/corpusdb2/fulltest/',
             'filename' : 'cage.wav',
             'storage' : 'np_memmap', # 'bin', 'np_memmap' || 'db'
+            'dims' : []
         }
         return metadata
 
