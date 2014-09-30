@@ -71,6 +71,7 @@ class DataNode(object):
             dir = str(alt)
         filename = os.path.basename(ngraph.filename)
         extstring = ngraph.available_features[ngraph.feature.__class__.__name__] # well aren't we clever
+        print 'dir: ', dir
         if mflag:
             extstring += ".json"
         return os.path.join(

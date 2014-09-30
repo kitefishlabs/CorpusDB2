@@ -26,3 +26,15 @@ myNodeGraphs = [BregmanNodeGraph(metadata={'rootpath':ROOT,'filename':pair[0],'f
 dc.pull_to_datanodes_and_save(nodegraphs=myNodeGraphs)
 
 
+
+
+
+
+from corpusdb2.nodegraph import BregmanNodeGraph
+from corpusdb2.datacollection import DataNode, DataNodeCollection
+from bregman.features import *
+import glob, itertools
+
+ROOT = '/Users/kfl/comp/corpusdb2/fulltest'
+
+dn = DataNode()
