@@ -72,9 +72,39 @@ class Segmentation(object):
     Each segment has a start, end, and implicit duration in frames.
     """
     def __init__(self, datanode, metadata=None):
+        if datanode is None:
+            return "Error: a data node is required."
         self.data_node = datanode
         self.frame_spans = []
-        self.readRawDataNode(self.datanode)
+        self.read_raw_data_node(self.datanode)
+
+    def _initialize(self, metadata):
+        """
+        Initialize important parameters
+        """
+        # TODO:
+        # self.reset()
+        self.metadata = self.default_metadata()
+        self._check_metadata(metadata)
+    
+    @staticmethod
+    def default_metadata():
+        """ These entries should  """
+        metadata = {
+            'segpath' : '~/comp/corpusdb2/fulltest/snd/',
+            'datapath' : '~/comp/corpusdb2/fulltest/data/',
+            'metadatapath' : '~/comp/corpusdb2/fulltest/md/',
+            'storage' : 'np_memmap', # 'bin', 'np_memmap' || 'db'
+        }
+        return metadata
+
+    def _check_metadata(self, metadata=None):
+        self.metadata = metadata if metadata is not None else self.metadata
+        md = self.default_metadata()
+        for k in md.keys():
+            self.metadata[k] = self.metadata.get(k, md[k])
+            self.__setattr__(k, self.metadata[k])
+        return self.metadata    
 
     def time_spans_to_frames(self, span_list):
         pass
@@ -83,20 +113,24 @@ class Segmentation(object):
         pass
     
     def __getitem__(self, index):
-        return self.time_spans[index]
+        return self.frame_spans[index]
 
     def __setitem__(self, index, segment):
         if type(segment) is not Segment:
             raise ValueError("Segmentation requires a Segment")
-        self.time_spans[index]=segment
+        self.frame_spans[index]=segment
 
     def __len__(self):
-        return len(self.time_spans)
+        return len(self.frame_spans)
 
     def append(self, segment):
         if type(segment) is not Segment:
             raise ValueError("Segmentation requires a Segment")
-        self.time_spans.append(segment)
+        self.frame_spans.append(segment)
 
     def __repr__(self):
-        return self.time_spans.__repr__()
+        return self.frame_spans.__repr__()
+
+# for now, assume that we will get a np array
+#     read_raw_data_node(self):
+#         self.datanode.get_
