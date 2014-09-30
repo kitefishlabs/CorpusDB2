@@ -1,13 +1,13 @@
 # '~/comp/corpusdb2/fulltest/snd' # this is where the sounds are!
 
 from corpusdb2.nodegraph import BregmanNodeGraph
-from corpusdb2.datacollection import DataCollection
+from corpusdb2.datacollection import DataNode, DataNodeCollection
 from bregman.features import *
 import glob, itertools
 
 ROOT = '/Users/kfl/comp/corpusdb2/fulltest'
 
-dc = DataCollection()
+dc = DataNodeCollection()
 
 snds = []
 for filename in glob.glob(os.path.join(ROOT,'snd','*.wav')):
@@ -23,6 +23,6 @@ for s in snds:
 myNodeGraphs = [BregmanNodeGraph(metadata={'rootpath':ROOT,'filename':pair[0],'feature':pair[1]}) for pair in pairs]
 
 
-dc.pullToDataNodesAndSave(nodegraphs=myNodeGraphs)
+dc.pull_to_datanodes_and_save(nodegraphs=myNodeGraphs)
 
 

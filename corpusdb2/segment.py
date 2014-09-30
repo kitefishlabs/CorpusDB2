@@ -76,7 +76,7 @@ class Segmentation(object):
             return "Error: a data node is required."
         self.data_node = datanode
         self.frame_spans = []
-        self.read_raw_data_node(self.datanode)
+#         self.read_raw_data_node(self.datanode)
 
     def _initialize(self, metadata):
         """
@@ -131,6 +131,6 @@ class Segmentation(object):
     def __repr__(self):
         return self.frame_spans.__repr__()
 
-# for now, assume that we will get a np array
+    # for now, assume that we will get a np array
 #     read_raw_data_node(self):
 #         self.datanode.get_

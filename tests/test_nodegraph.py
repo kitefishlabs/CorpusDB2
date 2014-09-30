@@ -40,26 +40,26 @@ class TestNodeGraph(object):
         assert_equal(self.bng.filename, TestNodeGraph.correct_filename)
     
     def test_read_wav(self):
-        self.bng._readWavFile()
+        self.bng._read_wav_file()
         assert_equal(self.bng.sr, 44100)
         assert_equal(self.bng.fmt, 'pcm16')
         assert_not_equal(self.bng.rawaudio, None)
     
     def test_wav_first_sample(self):
-        self.bng._readWavFile()
+        self.bng._read_wav_file()
         assert_equal(self.bng.rawaudio[0], -0.005096435546875)
 
     def test_analysis_read_wav(self):
         """
         Calling processWavFile should call through to readWav, exactly as above.
         """
-        self.bng.processWavFile()
+        self.bng.process_wav_file()
         assert_equal(self.bng.sr, 44100)
         assert_equal(self.bng.fmt, 'pcm16')
         assert_not_equal(self.bng.rawaudio, None)
 
     def test_analysis(self):
-        self.bng.processWavFile()
+        self.bng.process_wav_file()
         assert_equal(isinstance(self.bng.feature, LinearFrequencySpectrum().__class__), True)
         assert_equal(self.bng.X.shape, self.bng.dims)
         assert_equal(self.bng.X.shape, (8193, 26))        
@@ -71,7 +71,7 @@ class TestNodeGraph(object):
             'filename':'testsnd.wav',
             'feature' : LogFrequencySpectrum
         })
-        self.bnglog.processWavFile()
+        self.bnglog.process_wav_file()
         assert_equal(isinstance(self.bnglog.feature, LogFrequencySpectrum().__class__), True)
         assert_equal(self.bnglog.X.shape, self.bnglog.dims)
         assert_equal(self.bnglog.X.shape, (95, 26))

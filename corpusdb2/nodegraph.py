@@ -116,7 +116,7 @@ class BregmanNodeGraph(object):
     def __repr__(self):
         return "%s | %s | %s" % (self.rootpath, self.filename, self.feature)
             
-    def _readWavFile(self):
+    def _read_wav_file(self):
         """
             Simply read raw audio data into class var.
         """
@@ -127,10 +127,10 @@ class BregmanNodeGraph(object):
             return "IOError! WAV read failed!"
         return self.rawaudio
     
-    def processWavFile(self, filename=None, ftr=None):
+    def process_wav_file(self, filename=None, ftr=None):
         if filename is not None:
             self.filename = filename
-        self._readWavFile()
+        self._read_wav_file()
         if ftr is None:
             ftr = self.feature
         if self.rawaudio is not None:

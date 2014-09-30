@@ -1,4 +1,4 @@
-from corpusdb2.datacollection import DataCollection
+from corpusdb2.datacollection import DataNode, DataNodeCollection
 import numpy as np
 from bregman.features import LinearFrequencySpectrum
 
@@ -21,7 +21,7 @@ class TestDataCollection(object):
     
     def setUp(self):
         """This method is run once before _each_ test method is executed"""
-        self.dc = DataCollection(metadata={'sndpath':'~/comp/corpusdb2/fulltest/snd/'})
+        self.dc = DataNodeCollection(metadata={'sndpath':'~/comp/corpusdb2/fulltest/snd/'})
         
     def teardown(self):
         """This method is run once after _each_ test method is executed"""
