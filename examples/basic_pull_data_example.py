@@ -5,12 +5,12 @@ from corpusdb2.datacollection import DataCollection
 from bregman.features import *
 import glob, itertools
 
-
+ROOT = '/Users/kfl/comp/corpusdb2/fulltest'
 
 dc = DataCollection()
 
 snds = []
-for filename in glob.glob('/Users/kfl/comp/corpusdb2/fulltest/snd/*.wav'):
+for filename in glob.glob(os.path.join(ROOT,'snd','*.wav')):
     snds += [filename]
 
 ftrs = [LinearFrequencySpectrum, MelFrequencyCepstrum, dBPower]
@@ -18,9 +18,9 @@ ftrs = [LinearFrequencySpectrum, MelFrequencyCepstrum, dBPower]
 pairs = []
 for s in snds:
     for f in ftrs:
-        pairs += [[s,f]]
+        pairs += [[os.path.basename(s),f]]
 
-myNodeGraphs = [BregmanNodeGraph(metadata={'sndpath':pair[0],'feature':pair[1]}) for pair in pairs]
+myNodeGraphs = [BregmanNodeGraph(metadata={'rootpath':ROOT,'filename':pair[0],'feature':pair[1]}) for pair in pairs]
 
 
 dc.pullToDataNodesAndSave(nodegraphs=myNodeGraphs)
