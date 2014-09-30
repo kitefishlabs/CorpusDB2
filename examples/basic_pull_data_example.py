@@ -42,7 +42,7 @@ dn = DataNode()
 snds = []
 for filename in glob.glob(os.path.join(ROOT,'snd','*.wav')):
     snds += [filename]
-snd = snds[0]
+snd = os.path.basename(snds[0])
 
 myNodeGraph = BregmanNodeGraph(metadata={'rootpath':ROOT,'filename':snd,'feature':LinearFrequencySpectrum})
 

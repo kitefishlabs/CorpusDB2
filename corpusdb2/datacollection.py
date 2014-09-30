@@ -30,6 +30,8 @@ metadata and, based on that, instantiate both the metadata and data as needed.
 B. Data nodes are set up to automatically read metadata and data upon creation, given that 
 such data exists and that there are no overriding flags set.
 
+Trying A first!
+
 """
 
 
@@ -86,6 +88,7 @@ class DataNode(object):
             (str(filename)+extstring))
 
     def pull_to_datanode_and_save(self, nodegraph):
+        print nodegraph.filename
         nodegraph.process_wav_file()
         if self.storage is 'np_memmap':
             if self.filename is not None:

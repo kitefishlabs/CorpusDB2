@@ -144,7 +144,7 @@ class BregmanNodeGraph(object):
     
     def process_wav_file(self, filename=None, ftr=None):
         if filename is not None:
-            self.filename = filename
+            self.metadata.filename = os.path.basename(filename)
         self._read_wav_file()
         if ftr is None:
             ftr = self.feature
