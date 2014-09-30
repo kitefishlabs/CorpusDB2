@@ -30,7 +30,7 @@ metadata and, based on that, instantiate both the metadata and data as needed.
 B. Data nodes are set up to automatically read metadata and data upon creation, given that 
 such data exists and that there are no overriding flags set.
 
-Trying A first!
+Trying B first!
 
 """
 
@@ -88,15 +88,14 @@ class DataNode(object):
             (str(filename)+extstring))
 
     def pull_to_datanode_and_save(self, nodegraph):
-        print nodegraph.filename
         nodegraph.process_wav_file()
         if self.storage is 'np_memmap':
             if self.filename is not None:
                 datapath = self.get_full_datapath_for_nodegraph(nodegraph)
                 # since there is a mechanism pass the filename on the nodegraph
                 self.metadata['filename'] = nodegraph.filename
-                fp = np.memmap(datapath, np.float32, 'w+', shape=nodegraph.dims)
-                fp[:] = nodegraph.X[:]
+                fp = np.memmap(datapath, dtype=np.float32, mode='w+', shape=nodegraph.dims)
+                fp[:] = np.array(nodegraph.X[:], dtype=np.float32)
                 self.metadata['dims'] = list(fp.shape)
                 del fp
                 # now save the updated md to disk
@@ -105,10 +104,13 @@ class DataNode(object):
                 f = open(md_filepath, 'w')
                 print >> f, j
                 f.close()
-                return 1
+                return (1, os.path.basename(md_filepath))
             else:
                 print "Error. Unable to save metadata file!"
-                return 0
+                return (0, None)
+    
+#     def datanode_from_metadata(self):
+        
 
 
 
@@ -169,10 +171,10 @@ class DataNodeCollection(object):
     def pull_to_datanodes_and_save(self, nodegraphs):
         for ng in nodegraphs:
             node = DataNode()
-            res = node.pull_to_datanode_and_save(ng)
+            res, fullname = node.pull_to_datanode_and_save(ng)
             if res == 1:
                 print "success!"
-                self.metadata['entries'] += [[ng.filename, ng.feature.__class__.__name__]]
+                self.metadata['entries'] += [[ng.filename, ng.feature.__class__.__name__, fullname]]
             else:
                 print "failure!"
         # for now, name it 'data.json'
