@@ -40,23 +40,18 @@ class DataNode(object):
     Single node.
     """
     def __init__(self, arg=None, metadata=None):
-#         if arg ROOT +/+ DIR +/+ filename + ext +.json
-        # check if node metadata exists
-        # if so read json + init with that metadata; otherwise use defaults
         self._initialize(metadata)
     
     def _initialize(self, metadata):
         """
         Initialize important parameters
+        # TODO: reset()
         """
-        # TODO:
-        # self.reset()
         self.metadata = self.default_metadata()
         self._check_metadata(metadata)
     
     @staticmethod
     def default_metadata():
-        """ These entries should  """
         metadata = {
             'rootpath' : '~/comp/corpusdb2/fulltest/',
             'filename' : 'cage.wav',
@@ -65,6 +60,7 @@ class DataNode(object):
         return metadata
 
     def _check_metadata(self, metadata=None):
+        print "DN"
         self.metadata = metadata if metadata is not None else self.metadata
         md = self.default_metadata()
         for k in md.keys():
@@ -146,13 +142,13 @@ class DataNodeCollection(object):
         return metadata
 
     def _check_metadata(self, metadata=None):
+        print "DNC"
         self.metadata = metadata if metadata is not None else self.metadata
         md = self.default_metadata()
         for k in md.keys():
             self.metadata[k] = self.metadata.get(k, md[k])
-            print k, ' --> ', self.metadata[k]
             self.__setattr__(k, self.metadata[k])
-        return self.metadata    
+        return self.metadata
     
     def get_full_datapath_for_nodegraph(self, ngraph, mflag=False, alt=None):
         # basename, just in case?
@@ -183,3 +179,7 @@ class DataNodeCollection(object):
         f = open(md_filepath, 'w')
         print >> f, j
         f.close()
+
+def load_any_json(jsonfile):
+    json_data=open(jsonfile)
+    return json.load(json_data)

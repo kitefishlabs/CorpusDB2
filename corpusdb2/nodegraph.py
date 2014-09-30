@@ -69,8 +69,6 @@ class BregmanNodeGraph(object):
         """
         Initialize important parameters
         """
-        # TODO:
-        # self.reset()
         self.metadata = self.default_metadata()
         self._check_metadata(metadata)
     
