@@ -61,26 +61,35 @@ class DataCollection(object):
             self.__setattr__(k, self.metadata[k])
         return self.metadata    
     
+    def get_full_datapath(self, ngraph, mflag=False, alt=None):
+        # basename, just in case?
+        dir = 'data'
+        if alt is not None:
+            dir = str(alt)
+        filename = os.path.basename(ngraph.filename)
+        extstring = ngraph.available_features[ngraph.feature.__class__.__name__] # well aren't we clever
+        if mflag:
+            extstring += ".json"
+        return os.path.join(
+            os.path.expanduser(self.rootpath),
+            dir,
+            (str(filename)+extstring))
+    
     def pullToDataNodesAndSave(self, nodegraphs):
         for ng in nodegraphs:
 #             print ng.filename, " || ", ng.feature, " | ", type(ng.feature)
             ng.processWavFile()
             if self.storage is 'np_memmap':
-                # basename, just in case?
-                filename = os.path.basename(ng.filename)
-                extstring = ng.available_features[ng.feature.__class__.__name__] # well aren't we clever
                 if self.filename is not None:
-                    datapath = os.path.join(
-                        os.path.expanduser(self.rootpath),
-                        'data',
-                        (str(filename)+extstring))
+                    datapath = self.get_full_datapath(ng)
+                    # since there is a mechanism pass the filename on the ng
+                    self.metadata['filename'] = ng.filename
                     fp = np.memmap(datapath, np.float32, 'w+', shape=ng.dims)
                     fp[:] = ng.X[:]
+                    self.metadata['dims'] = list(fp.shape)
                     del fp
-                    md_filepath = os.path.join(
-                        os.path.expanduser(self.rootpath),
-                        'data',
-                        (str(filename)+extstring+".json"))
+                    # now save the updated md to disk
+                    md_filepath = self.get_full_datapath(ng, True)
                     j = json.dumps(self.metadata, indent=4)
                     f = open(md_filepath, 'w')
                     print >> f, j
@@ -88,8 +97,8 @@ class DataCollection(object):
                 else:
                     print "Error. Unable to save metadata file!"
     
-#     def get_raw_data_from_node(self, datanode_filename):
-#         
-#         filepath = '~/comp/corpusdb2/fulltest/dnodes/' + datanode_filename
-#         datanode_md = '~/comp/corpusdb2/fulltest/dnodes/' + datanode_filename
+#     def get_raw_data_from_node(self, datanode_filename):        
+#         # load the json if it exists
+#         filepath = get_full_datapath()
+#         ngmd = get_fulldata
 #         fp = np.memmap(filepath, np.float32, 'r', shape=dnode.dims)
