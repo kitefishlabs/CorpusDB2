@@ -62,7 +62,17 @@ class FrameSegment(object):
         self.label = str(label)
     def __repr__(self):
         return "(label=%s, %s, %s)"%(self.label, self.frame_span.__repr__(), self.features.__repr__())
+    
+    def mean(self):
+        return np.mean(self.features, 0)
+    def var(self):
+        return np.var(self.features, 0)
 
+    def logmean(self):
+        return np.log(np.mean(self.features, 0))
+    def logvar(self):
+        return np.log(np.var(self.features, 0))
+    
 
 class Segmentation(object):
     """
@@ -176,6 +186,9 @@ class Segmentation(object):
         self.append(FrameSegment(0,self.frames, features=self._datanode.load_data()))
         return self
     
+    def assign_segments_by_hierarchical_clustering(self):
+        pass
+    
     def __repr__(self):
         return self.frame_spans.__repr__()
 
@@ -186,3 +199,20 @@ class Segmentation(object):
 def load_any_json(jsonfile):
     json_data=open(jsonfile)
     return json.load(json_data)
+
+from scipy import sparse
+
+def generate_connectivity_matrix(size, loop_flag=False):
+		"""
+		Generate a square connectivity matrix with positive connections from t -> t-1 (identity) and t -> t+1; link end to beginning if loop_flag is True.
+		Returns a sparse 
+		"""
+		eye = np.identity(size, dtype=np.int8)
+		nn1 = np.add( np.roll(eye, 1, axis=0), np.roll(eye, 1, axis=1))
+		
+		if not loop_flag:
+			nn1[-1,0] = 0
+			nn1[0,-1] = 0
+		#print nn1[:30,:30]
+		return sparse.csr_matrix(nn1)
+
