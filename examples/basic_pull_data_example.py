@@ -57,8 +57,20 @@ dn.pull_to_datanode_and_save(nodegraph=myNodeGraph)
 
 
 from corpusdb2.nodegraph import BregmanNodeGraph
-from corpusdb2.datacollection import DataNode, DataNodeCollection
+from corpusdb2.datacollection import DataNode, DataNodeCollection, load_any_json
+from corpusdb2.segment import FrameSegment, Segmentation
 from bregman.features import *
-import glob, itertools
+import os, glob, itertools
 
 ROOT = '/Users/kfl/comp/corpusdb2/fulltest'
+
+from corpusdb2.datacollection import *
+data = load_any_json(os.path.join(os.path.expanduser(ROOT),'data','data.json'))
+entry = data['entries'][0]
+
+segm = Segmentation(os.path.join(os.path.expanduser(ROOT),'data',entry[2]))
+
+
+
+
+

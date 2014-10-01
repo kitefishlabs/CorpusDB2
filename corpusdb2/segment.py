@@ -34,7 +34,11 @@ class FrameSpan(object):
             raise ValueError("start_frame must be provided")
         self.start_frame=float(start_frame)
         if end_frame==None and start_frame==None:
-            raise ValueError("One of end_frame or dur_frames must be supplied")                
+            raise ValueError("One of end_frame or dur_frames must be supplied")
+        if start_frame < 0:
+            raise ValueError("Start frame must be positive.")
+        if dur_frames < 1:
+            raise ValueError("dur_frames/end_frames should be greater than 0.")
         self.dur_frames = float(end_frame) - self.start_frame if dur_frames is None else float(dur_frames)
         self.end_frame = self.start_frame + float(dur_frames) if end_frame is None else float(end_frame)
         if abs(self.end_frame - self.start_frame - self.dur_frames)>np.finfo(np.float32).eps:
@@ -151,17 +155,22 @@ class Segmentation(object):
         return self.frame_spans[index]
 
     def __setitem__(self, index, segment):
-        if type(segment) is not Segment:
-            raise ValueError("Segmentation requires a Segment")
+        self.check_segment_data(segment)
         self.frame_spans[index]=segment
+    
+    def __delitem__(self, index):
+        del self.frame_spans[index]
 
     def __len__(self):
         return len(self.frame_spans)
+
+    def check_segment_data(self, segment):
+        if type(segment) is not FrameSegment:
+            raise ValueError("Segmentation requires a Segment")
     
     # do all error- and logic-checking in caller, for now...
     def append(self, segment):
-        if type(segment) is not FrameSegment:
-            raise ValueError("Segmentation requires a FrameSegment")
+        self.check_segment_data(segment)
         self.frame_spans.append(segment)
 
     def __repr__(self):

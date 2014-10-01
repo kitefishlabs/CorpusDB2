@@ -36,3 +36,8 @@ class TestSegments(object):
         assert_equal(self.fseg2.frame_span.end_frame, 22)
         assert_equal(self.fseg2.frame_span.dur_frames, 12)
     
+#     def test_negative_time(self):
+#         assert_raises(ValueError, Segmentation(None).append, 0, 0)
+#         assert_raises(ValueError, Segmentation(None).append, -1, -1)
+#
+# NEED TO SET UP A DNODE FIRST so we can pass the path to the Segmentation __init__
