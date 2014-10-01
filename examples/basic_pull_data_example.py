@@ -70,7 +70,7 @@ entry = data['entries'][0]
 
 segm = Segmentation(os.path.join(os.path.expanduser(ROOT),'data',entry[2]))
 
-
+segm.assign_single_full_segment()
 
 
 

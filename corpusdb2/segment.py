@@ -172,6 +172,10 @@ class Segmentation(object):
         self.check_segment_data(segment)
         self.frame_spans.append(segment)
 
+    def assign_single_full_segment(self):
+        self.append(FrameSegment(0,self.frames, features=self._datanode.load_data()))
+        return self
+    
     def __repr__(self):
         return self.frame_spans.__repr__()
 
