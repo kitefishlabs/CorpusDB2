@@ -61,13 +61,15 @@ class DataNode(object):
         return metadata
 
     def _check_metadata(self, metadata=None):
-        print "DN"
         self.metadata = metadata if metadata is not None else self.metadata
         md = self.default_metadata()
         for k in md.keys():
-            self.metadata[k] = self.metadata.get(k, md[k])
-            self.__setattr__(k, self.metadata[k])
-        return self.metadata    
+            self._update_metadata(k, self.metadata.get(k, md[k]))
+        return self.metadata
+
+    def _update_metadata(self, k, val):
+        self.metadata[str(k)] = val
+        self.__setattr__(k, self.metadata[k])
     
     def get_full_datapath_for_nodegraph(self, ngraph, mflag=False, alt=None):
         # basename, just in case?
@@ -79,24 +81,27 @@ class DataNode(object):
 #         print 'dir: ', dir
         if mflag:
             extstring += ".json"
-        return os.path.join(
-            os.path.expanduser(self.rootpath),
-            dir,
+        # the second return val is just the expanded filename + extension
+        return (
+            os.path.join(
+                os.path.expanduser(self.rootpath),
+                dir,
+                (str(filename)+extstring)),
             (str(filename)+extstring))
 
     def pull_to_datanode_and_save(self, nodegraph):
         nodegraph.process_wav_file()
         if self.storage is 'np_memmap':
             if self.filename is not None:
-                datapath = self.get_full_datapath_for_nodegraph(nodegraph)
+                datapath, fullfilename = self.get_full_datapath_for_nodegraph(nodegraph)
                 # since there is a mechanism pass the filename on the nodegraph
-                self.metadata['filename'] = nodegraph.filename
+                self._update_metadata('filename', fullfilename)
                 fp = np.memmap(datapath, dtype=np.float32, mode='w+', shape=nodegraph.dims)
                 fp[:] = np.array(nodegraph.X[:], dtype=np.float32)
-                self.metadata['dims'] = list(fp.shape)
+                self._update_metadata('dims', list(fp.shape))
                 del fp
                 # now save the updated md to disk
-                md_filepath = self.get_full_datapath_for_nodegraph(nodegraph, True)
+                md_filepath, x = self.get_full_datapath_for_nodegraph(nodegraph, True)
                 j = json.dumps(self.metadata, indent=4)
                 f = open(md_filepath, 'w')
                 print >> f, j
@@ -106,8 +111,14 @@ class DataNode(object):
                 print "Error. Unable to save metadata file!"
                 return (0, None)
     
-#     def datanode_from_metadata(self):
-        
+    def full_path_for_filename(self):
+        return os.path.join(os.path.expanduser(self.rootpath), 'data', self.filename)
+    
+    def load_data(self):
+        fp = np.memmap(self.full_path_for_filename(), dtype=np.float32, mode='r', shape=(self.dims[1], self.dims[0]))
+        res = np.array(fp)
+        del fp
+        return res
 
 
 
