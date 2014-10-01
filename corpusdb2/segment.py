@@ -37,7 +37,7 @@ class FrameSpan(object):
             raise ValueError("One of end_frame or dur_frames must be supplied")
         if start_frame < 0:
             raise ValueError("Start frame must be positive.")
-        if dur_frames < 1:
+        if dur_frames is not None and dur_frames < 1:
             raise ValueError("dur_frames/end_frames should be greater than 0.")
         self.dur_frames = float(end_frame) - self.start_frame if dur_frames is None else float(dur_frames)
         self.end_frame = self.start_frame + float(dur_frames) if end_frame is None else float(end_frame)
@@ -104,11 +104,7 @@ class Segmentation(object):
         self.metadata = metadata if metadata is not None else self.metadata
         md = self.default_metadata()
         for k in md.keys():
-            print 'KEY: ', k
             self._update_metadata(k, self.metadata.get(k, md[k]))
-#             self.metadata[k] = self.metadata.get(k, md[k])
-#             print '***'
-#             self.__setattr__(k, self.metadata[k])
         return self.metadata
 
     def _update_metadata(self, k, val):
@@ -124,10 +120,10 @@ class Segmentation(object):
         if int(self._datanode.dims[1]) is None:
             # first dim is # of frames
             self._update_metadata('cols', 1)
-            self._update_metadata('frames', int(self._datanode.dims[0]))
+            self._update_metadata('frames', int(self._datanode.dims[1]))
         else:
-            self._update_metadata('cols', int(self._datanode.dims[1]))
-            self._update_metadata('frames', int(self._datanode.dims[0]))
+            self._update_metadata('cols', int(self._datanode.dims[0]))
+            self._update_metadata('frames', int(self._datanode.dims[1]))
             
 
 #     def get_full_segpath(self, data_md, mflag=False, alt=None):
@@ -159,7 +155,10 @@ class Segmentation(object):
         self.frame_spans[index]=segment
     
     def __delitem__(self, index):
-        del self.frame_spans[index]
+        if self.frame_spans[index] is not None:
+            del self.frame_spans[index]
+        else:
+            raise IndexError("Attempting to delete an item that does not exist.")
 
     def __len__(self):
         return len(self.frame_spans)
