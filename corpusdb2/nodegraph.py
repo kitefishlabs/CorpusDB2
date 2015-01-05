@@ -41,12 +41,12 @@ These are the default params/metadata for the feature extractors:
     'intensify' : False,    # Whether to use critical band masking in chroma extraction
     'verbosity' : 1,        # How much to tell the user about extraction
     'available_features' : [
-                LinearFrequencySpectrum, # all 6 available Bregman features
-                LogFrequencySpectrum, 
-                MelFrequencySpectrum, 
-                MelFrequencyCepstrum,
-                Chromagram,
-                dBPower]
+        LinearFrequencySpectrum, # all 6 available Bregman features
+        LogFrequencySpectrum, 
+        MelFrequencySpectrum, 
+        MelFrequencyCepstrum,
+        Chromagram,
+        dBPower]
 }
 
 """
@@ -74,7 +74,7 @@ class BregmanNodeGraph(object):
     
     @staticmethod
     def default_metadata():
-        """ metadata == params """
+        """ metadata == analysis params + available features """
         metadata = {
             'rootpath' : '~/comp/corpusdb2/fulltest/',
             'filename' : 'cage.wav',
@@ -141,12 +141,16 @@ class BregmanNodeGraph(object):
             (str(filename)+extstring))
     
     def process_wav_file(self, filename=None, ftr=None):
+        # filename != None means the file name was passed in as an arg
         if filename is not None:
             self.metadata.filename = os.path.basename(filename)
         self._read_wav_file()
+        # ftr != None means the feature name was passed in as an arg
         if ftr is None:
             ftr = self.feature
+        
         if self.rawaudio is not None:
+            # ftr is a class
             self.feature = ftr(self.rawaudio)
             self.X = self.feature.X
             self.dims = np.shape(self.X)

@@ -89,7 +89,7 @@ class Segmentation(object):
 
     def _initialize(self, metadata):
         """
-        Initialize important parameters
+        Initialize + check metadata.
         """
         # TODO:
         # self.reset()
@@ -98,7 +98,9 @@ class Segmentation(object):
     
     @staticmethod
     def default_metadata():
-        """ These entries should  """
+        """
+        	These entries are provisional and should be available for checking later whether the analysis has been done.
+        """
         metadata = {
             'rootpath' : '~/comp/corpusdb2/fulltest/',
             'dir' : 'seg',
@@ -123,7 +125,7 @@ class Segmentation(object):
         self.__setattr__(k, self.metadata[k])
     
     def read_datanode_json(self, dnodepath):
-        # check type???
+        # check path???
         print dnodepath
         self._datanode = DataNode(metadata=load_any_json(str(dnodepath)))
         print self._datanode
@@ -174,15 +176,20 @@ class Segmentation(object):
         return len(self.frame_spans)
 
     def check_segment_data(self, segment):
+    	""" Only accept FrameSegments (for now). """
         if type(segment) is not FrameSegment:
             raise ValueError("Segmentation requires a Segment")
     
     # do all error- and logic-checking in caller, for now...
     def append(self, segment):
+    	""" Append a FrameSegment and return the size + resulting frame spans. """
+    	# check that segment data is a FrameSegment type
         self.check_segment_data(segment)
         self.frame_spans.append(segment)
+        return (len(self.frame_spans), self.frame_spans)
 
     def assign_single_full_segment(self):
+    	""" Map all frames from an audio file to a single segment. """
         self.append(FrameSegment(0,self.frames, features=self._datanode.load_data()))
         return self
     
