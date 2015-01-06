@@ -108,3 +108,7 @@ sdn = segm._datanode
 x = sdn.load_data()
 
 cm = generate_connectivity_matrix(x.shape[0])
+
+# plot the connectivity matrix
+#imagesc(cm.todense())
+

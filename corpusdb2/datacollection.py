@@ -115,7 +115,7 @@ class DataNode(object):
         return os.path.join(os.path.expanduser(self.rootpath), 'data', self.filename)
     
     def load_data(self):
-        fp = np.memmap(self.full_path_for_filename(), dtype=np.float32, mode='r', shape=(self.dims[1], self.dims[0]))
+        fp = np.memmap(self.full_path_for_filename(), dtype=np.float32, mode='r', shape=(self.dims[0], self.dims[1]))
         res = np.array(fp)
         del fp
         return res
