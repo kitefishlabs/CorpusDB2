@@ -162,7 +162,7 @@ class DataNodeCollection(object):
             self.__setattr__(k, self.metadata[k])
         return self.metadata
     
-    def get_full_datapath_for_nodegraph(self, ngraph, mflag=False, alt=None):
+    def get_full_datapath_for_nodegraph(self, ngraph, mflag=False, altdir=None):
         # basename, just in case?
         dir = 'data'
         if alt is not None:
