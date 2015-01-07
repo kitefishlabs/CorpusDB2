@@ -71,7 +71,7 @@ class DataNode(object):
         self.metadata[str(k)] = val
         self.__setattr__(k, self.metadata[k])
     
-    def get_full_datapath_for_nodegraph(self, ngraph, mflag=False, alt=None):
+    def get_full_datapath_for_nodegraph(self, ngraph, mdflag=False, alt=None):
         # basename, just in case?
         dir = 'data'
         if alt is not None:
@@ -79,7 +79,7 @@ class DataNode(object):
         filename = os.path.basename(ngraph.filename)
         extstring = ngraph.available_features[ngraph.feature.__class__.__name__] # well aren't we clever
 #         print 'dir: ', dir
-        if mflag:
+        if mdflag:
             extstring += ".json"
         # the second return val is just the expanded filename + extension
         return (
@@ -101,7 +101,7 @@ class DataNode(object):
                 self._update_metadata('dims', list(fp.shape))
                 del fp
                 # now save the updated md to disk
-                md_filepath, x = self.get_full_datapath_for_nodegraph(nodegraph, True)
+                md_filepath, x = self.get_full_datapath_for_nodegraph(nodegraph, mdflag=True)
                 j = json.dumps(self.metadata, indent=4)
                 f = open(md_filepath, 'w')
                 print >> f, j
@@ -162,20 +162,6 @@ class DataNodeCollection(object):
             self.__setattr__(k, self.metadata[k])
         return self.metadata
     
-    def get_full_datapath_for_nodegraph(self, ngraph, mflag=False, altdir=None):
-        # basename, just in case?
-        dir = 'data'
-        if alt is not None:
-            dir = str(alt)
-        filename = os.path.basename(ngraph.filename)
-        extstring = ngraph.available_features[ngraph.feature.__class__.__name__] # well aren't we clever
-        if mflag:
-            extstring += ".json"
-        return os.path.join(
-            os.path.expanduser(self.rootpath),
-            dir,
-            (str(filename)+extstring))
-
     def pull_to_datanodes_and_save(self, nodegraphs):
         for ng in nodegraphs:
             node = DataNode()
